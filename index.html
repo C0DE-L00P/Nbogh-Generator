@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Generator</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body class="bg-dark container pt-4">
+  <form onsubmit="accountHandling(event)">
+    <div class="mb-3">
+      <input type="text" name="email" class="form-control bg-light" id="email" placeholder="Username with spaces Ex: lara_2018, shazagalal, user876" value="">
+    </div>
+    <!-- <div class="mb-3">
+      <input type="text" name="password" class="form-control bg-light" id="password" placeholder="Password" value="12345678">
+    </div> -->
+    <div class="mb-3">
+      <input type="text" name="firstName" class="form-control bg-light" id="firstName" placeholder="First Name" value="">
+    </div>
+    <div class="mb-3">
+      <input type="text" name="lastName" class="form-control bg-light" id="lastName" placeholder="Last Name" value="">
+    </div>
+    <div class="mb-3">
+      <select name="country" class="form-select">
+        <option value="eg">مصر</option>
+        <option value="sa">السعودية</option>
+        <option value="kw">الكويت</option>
+        <option value="ae" selected>الامارات</option>
+        <option value="ps">فلسطين</option>
+        <option value="tr">تركيا</option>
+        <option value="om">عمان</option>
+        <option value="ye">اليمن</option>
+        <option value="dz">الجزائر</option>
+        <option value="sy">سوريا</option>
+      </select>
+    </div>
+    <div class="d-flex justify-content-between">
+      <button type="submit" class="btn btn-primary text-white fw-bolder">Create Account</button>
+      <div id="loader1" class="d-none" style="width:120px;height:24px;-webkit-mask:radial-gradient(circle closest-side,#000 94%,#0000) 0 0/25% 100%,linear-gradient(#000 0 0) center/calc(100% - 12px) calc(100% - 12px) no-repeat;background:linear-gradient(#25b09b 0 0) 0/0% no-repeat#ddd; transition-duration: 0.3s;"></div>
+      <span class="text-white">accounts: <span id="acc_counter">0</span></span>
+    </div>
+  </form>
+
+  <br>
+  <h4 class="text-white fw-bold">Kids</h4>
+  <form onsubmit="kidHandling(event)">
+    <div class="mb-3">
+      <input type="text" name="kidFirstName" class="form-control bg-light" id="kidFirstName" placeholder="Kid's First Name" value="">
+    </div>
+    <div class="mb-3">
+      <input type="text" name="kidLastName" class="form-control bg-light" id="kidLastName" placeholder="Kid's Last Name" value="">
+    </div>
+    <div class="mb-3 text-white">
+      <input type="radio" name="gender" id="girl" value="GIRL">
+      <label for="girl">Girl</label>
+
+      <input type="radio" name="gender" id="boy" value="BOY">
+      <label for="boy">Boy</label>
+    </div>
+    <div class="mb-3">
+      <input type="date" class="form-control bg-light" id="bornDate" name="bornDate" placeholder="Born Date">
+    </div>
+    <!-- <div class="mb-3">
+      <input type="number" class="form-control bg-light" id="countOfActivitiesDone" placeholder="Count of Activities Done">
+    </div> -->
+
+    <div class="d-flex justify-content-between">
+      <button type="submit" class="btn btn-primary text-white fw-bolder">Add Child</button>
+      <div id="loader2" class="d-none" style="width:120px;height:24px;-webkit-mask:radial-gradient(circle closest-side,#000 94%,#0000) 0 0/25% 100%,linear-gradient(#000 0 0) center/calc(100% - 12px) calc(100% - 12px) no-repeat;background:linear-gradient(#25b09b 0 0) 0/0% no-repeat#ddd;transition-duration: 0.3s;"></div>
+      <span class="text-white">kids: <span id="kids_counter">0</span></span>
+    </div>
+  </form>
+
+
+  <script>
+    const ADMIN_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJhZG1pbiIsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX1VTRVIiXSwiaWF0IjoxNzE0MjkwMzU4LCJleHAiOjE3MTQzNzY3NTh9.Tajrko0Ow-5tQpjLLR6_WuVjL3OebRluJut3oyeThQ4'
+    
+    let ACTIVITIES = [619,615,616,617,618,612,833,621,607,611,628,625,631,626,629,630,627,624,609,623,632,620,606,613,634,649,645,608,650,648,639,641,646,664,685,610,614,633,622,657,659,658,660,652,638,637,635,643,654,653,656,661,642,651,636,655,644,640,647,668,671,682,666,677,678,663,680,676,670,675,669,679,673,672,674,662,667,665,681,698,703,688,702,691,697,699,693,683,692,701,694,690,695,687,689,696,684,686,700,708,707,704,705,706,949,950,951,952,953,954,955,956,957,958,967]
+
+    const COUNTRIES = ["sa", "eg", "dz", "ye", "sy", "tr", "om", "ps", "ae", "kw"]
+    const ARTICLES = [23, 10, 13, 27, 24, 29, 11, 28, 31, 25, 22, 26, 33]
+
+    let USER_ID;
+    let TOKEN;
+    const ACC_LOADER = document.getElementById('loader1')
+    const KIDS_LOADER = document.getElementById('loader2')
+
+
+    let accCounter = localStorage.getItem('acc_count') || 0
+    let kidsCounter = localStorage.getItem('kids_count') || 0
+
+    const ACC_COUNT = document.getElementById('acc_counter')
+    ACC_COUNT.innerText = accCounter
+    const KIDS_COUNT = document.getElementById('kids_counter')
+    KIDS_COUNT.innerText = kidsCounter
+
+    async function accountHandling(event) {
+      event.preventDefault();
+
+      const formData = new FormData(event.target);
+      const email = formData.get('email')+"@gmail.com";
+      const password = '12345678';
+      const firstName = formData.get('firstName');
+      const lastName = formData.get('lastName');
+      const country = formData.get('country');
+
+      //   try {
+
+      ACC_LOADER.classList.remove('d-none')
+
+      console.log(email, password, firstName, lastName, country)
+      let userId = await register(email, password, firstName, lastName, country);
+      ACC_LOADER.style.backgroundSize = '25%'
+
+      await verifyAccount(userId, email);
+      ACC_LOADER.style.backgroundSize = '50%'
+
+      let token = await loginAccount(email, password);
+      ACC_LOADER.style.backgroundSize = '75%'
+
+      await updateConf(userId, token);
+      ACC_LOADER.style.backgroundSize = '100%'
+
+      accCounter++
+      ACC_COUNT.innerText = accCounter
+      localStorage.setItem('acc_count', accCounter)
+
+      USER_ID = userId
+      TOKEN = token
+      ACC_LOADER.classList.add('d-none')
+      ACC_LOADER.style.backgroundSize = '0%'
+
+      document.getElementById('firstName').value=""
+      document.getElementById('lastName').value=""
+      document.getElementById('email').value=""
+
+      //   } catch (error) {
+      //     alert( "Error: something went wrong")
+      //     console.error(error)
+      //   }finally{
+      //   }
+    }
+
+    async function kidHandling(event) {
+      event.preventDefault();
+
+      const formData = new FormData(event.target);
+      const firstName = formData.get('kidFirstName');
+      const lastName = formData.get('kidLastName');
+      const kidType = formData.get('gender');
+      const bornDate = formData.get('bornDate');
+
+      //   try {
+      KIDS_LOADER.classList.remove('d-none')
+
+      let kidId = await addKid(USER_ID, TOKEN, firstName, lastName, kidType, bornDate);
+      KIDS_LOADER.style.backgroundSize = '50%'
+      
+      shuffle(ACTIVITIES);
+      for (let i = 0; i < 26; i++) doActivity(ACTIVITIES[i], kidId, TOKEN)
+      
+      KIDS_LOADER.style.backgroundSize = '100%'
+
+
+      kidsCounter++
+      KIDS_COUNT.innerText = kidsCounter
+      localStorage.setItem('kids_count', kidsCounter)
+
+      KIDS_LOADER.classList.add('d-none')
+      KIDS_LOADER.style.backgroundSize = '0%'
+
+      document.getElementById('kidFirstName').value = ''
+      document.getElementById('kidFirstName').focus()
+
+      //TODO if payed activate
+      // articleViews()
+      // eventsViews()
+      // discussionViews()
+
+
+      //   } catch (error) {
+      //     alert( "Error: something went wrong")
+      //     console.error(error)
+      //   }finally{
+      //   }
+    }
+
+    function shuffle(array) {
+      array.sort(() => Math.random() - 0.5);
+      return array
+    }
+
+    async function register(email, password, firstName, lastName, country) {
+      let res = await fetch("https://admin.nobogh.net/api/register", {
+        "headers": {
+          "accept": "application/json",
+          "content-type": "application/json; charset=UTF-8",
+        },
+        "body": JSON.stringify({
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          country: country,
+          password: password,
+          login: email,
+          checkbox: true
+        }),
+        "method": "POST",
+      })
+      res = await res.json()
+      console.log(res);
+      //   if(res.statusCode != 200 && res.statusCode != 201) throw res.message
+      return res.id
+    }
+
+
+    //Verify Account
+
+    async function verifyAccount(id, email) {
+      let res = await fetch("https://admin.nobogh.net/api/admin/users", {
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "authorization": "Bearer " + ADMIN_TOKEN,
+          "content-type": "application/json;charset=UTF-8",
+        },
+        "body": JSON.stringify({
+          "id": id,
+          "login": email,
+          "email": email,
+          "activated": true,
+          communication: false,
+          secret: true
+        }),
+        "method": "PUT",
+      })
+      res = await res.json()
+      //   console.log(res);
+      //   if(res.statusCode != 200 && res.statusCode != 201) throw res.message
+    }
+
+    async function loginAccount(email, pass) {
+      let res = await fetch("https://admin.nobogh.net/api/authenticate", {
+        "headers": {
+          "accept": "application/json",
+          "content-type": "application/json; charset=UTF-8",
+        },
+        "body": JSON.stringify({
+          username: email,
+          password: pass,
+          rememberMe: false
+        }),
+        "method": "POST"
+      })
+      res = await res.json()
+      console.log(res)
+      //   if(res.statusCode != 200 && res.statusCode != 201) throw res.message
+      return res.id_token
+    }
+
+
+    //Update Account Configuration
+    async function updateConf(userId, token) {
+      let res = await fetch("https://admin.nobogh.net/api/v2/user-settings", {
+        "headers": {
+          "accept": "application/json",
+          "authorization": "Bearer " + token,
+          "content-type": "application/json; charset=UTF-8",
+        },
+        "body": JSON.stringify({
+          secret: false,
+          communication: false,
+          user: {
+            id: userId
+          }
+        }),
+        "method": "POST",
+      })
+      res = await res.json()
+      //   if(res.statusCode != 200 && res.statusCode != 201) throw res.message
+
+      console.log('UPDATE Config', res)
+      return res;
+    }
+
+    async function addKid(userId, userToken, firstName, lastName, kidType, bornDate) {
+      let res = await fetch("https://admin.nobogh.net/api/v2/kids?seperated=false&id=-1", {
+        "headers": {
+          "accept": "application/json",
+          "authorization": "Bearer " + userToken,
+          "content-type": "application/json; charset=UTF-8",
+        },
+        "body": JSON.stringify({
+          "firstName": firstName,
+          "lastName": lastName,
+          "birthDate": bornDate,
+          "gender": kidType,
+          "status": "ACTIVE",
+          "childMinder": {
+            "id": userId
+          },
+          "kidActivityCount": 0,
+          "kidActivitysum": 0,
+          "credit": 0
+        }),
+        "method": "POST",
+      })
+      res = await res.json();
+      return res.id
+    }
+
+    async function doActivity(activityId, kidId, userToken) {
+      let res = await fetch("https://admin.nobogh.net/api/v2/kid-activities", {
+        "headers": {
+          "accept": "application/json",
+          "authorization": "Bearer " + userToken,
+          "content-type": "application/json; charset=UTF-8",
+        },
+        "body": JSON.stringify({
+          activities: activityId,
+          kidActivity: {
+            attachments: [],
+            questionAnswers: []
+          },
+          attachments: [],
+          questionAnswers: [],
+          kids: kidId,
+        }),
+        "method": "POST",
+      })
+      res = res.json();
+      console.log('Activity ID', activityId)
+      return res;
+    }
+
+    async function articleViews() {
+      for (let i = 0; ARTICLES.length > i; i++)
+        await fetch("https://admin.nobogh.net/api/v2/article-views", {
+          "headers": {
+            "accept": "application/json",
+            "authorization": "Bearer " + TOKEN,
+            "content-type": "application/json; charset=UTF-8",
+          },
+          "body": JSON.stringify({
+            "article": {
+              "id": ARTICLES[i]
+            },
+            "view": {
+              "id": USER_ID
+            }
+          }),
+          "method": "POST",
+        });
+    }
+
+    async function eventsViews() {
+      await fetch("https://admin.nobogh.net/api/v2/event-views", {
+        "headers": {
+          "accept": "application/json",
+          "authorization": "Bearer " + TOKEN,
+          "content-type": "application/json; charset=UTF-8",
+        },
+        "body": JSON.stringify({
+          "event": {
+            "id": 31
+          },
+          "view": {
+            "id": USER_ID
+          }
+        }),
+        "method":"POST"
+      });
+    }
+
+    async function discussionViews() {
+      fetch("https://admin.nobogh.net/api/v2/discussions-views", {
+        "headers": {
+          "accept": "application/json",
+          "authorization": "Bearer " + TOKEN,
+          "content-type": "application/json; charset=UTF-8",
+        },
+        "body": JSON.stringify({
+          "discussion": {
+            "id": 14
+          },
+          "view": {
+            "id": USER_ID
+          }
+        }),
+        "method": "POST",
+      });
+
+      fetch("https://admin.nobogh.net/api/v2/discussions-views", {
+        "headers": {
+          "accept": "application/json",
+          "authorization": "Bearer " + TOKEN,
+          "content-type": "application/json; charset=UTF-8",
+        },
+        "body": JSON.stringify({
+          "discussion": {
+            "id": 13
+          },
+          "view": {
+            "id": USER_ID
+          }
+        }),
+        "method": "POST",
+      });
+    }
+
+    //Register
+    // const email = 'marwagamaly@gmail.com',
+    //   pass = '12345678',
+    //   firstName = 'Marwa',
+    //   lastName = 'Gamaly',
+    //   country = 'eg',
+    //   kidFirstName = 'Ola',
+    //   kidLastName = 'Alaa',
+    //   kidType = "GIRL",
+    //   bornDate = "2018-01-04T15:55:42.755Z"
+
+    // let userId, token, kidId
+    // let randActivityCount = Math.floor(Math.random() * 16),
+    //   randKidsCount = Math.floor(Math.random() * 4)
+    // console.table([randActivityCount, randKidsCount])
+  </script>
+</body>
+
+</html>
